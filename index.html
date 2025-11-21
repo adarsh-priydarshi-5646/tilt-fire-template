@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TILT FIRE - Arrow Key Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e27;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: #0a0e27;
+            overflow: hidden;
+        }
+
+        #welcomeScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e27;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        #welcomeScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcomeContent {
+            text-align: center;
+        }
+
+        .welcomeTitle {
+            color: #00FFFF;
+            font-size: 56px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px #00FFFF;
+            margin-bottom: 40px;
+        }
+
+        .welcomeSubtitle {
+            color: #00FF00;
+            font-size: 16px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .startButton {
+            background: #00FF00;
+            color: #000;
+            border: 2px solid #00FFFF;
+            padding: 16px 50px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 40px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .startButton:hover {
+            background: #00DD00;
+            box-shadow: 0 0 20px #00FFFF;
+        }
+
+        #gameArea {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #0a0e27;
+        }
+
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 130px;
+            background: rgba(10, 14, 39, 0.98);
+            border-bottom: 2px solid #00FFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .scoreContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .scoreLabel {
+            color: #00FFFF;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .scoreValue {
+            color: #00FF00;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .gameTitle {
+            color: #00FFFF;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #00FFFF;
+            flex: 1;
+            text-align: center;
+        }
+
+        .player {
+            position: absolute;
+            bottom: 20px;
+            width: 50px;
+            height: 50px;
+            background: #00FF00;
+            border: 2px solid #00FFFF;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .bullet {
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background: #FFFF00;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.4);
+        }
+
+        .block {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #FF1744;
+            border: 2px solid #FF6E40;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(255, 23, 68, 0.6);
+        }
+
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #gameOverScreen.show {
+            display: flex;
+        }
+
+        .gameOverCard {
+            background: #0a0e27;
+            border: 2px solid #00FFFF;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 20px #00FFFF;
+        }
+
+        .gameOverText {
+            color: #FF1744;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #FF1744;
+        }
+
+        .finalScore {
+            color: #00FF00;
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .restartButton {
+            background: #00FF00;
+            color: #000;
+            border: 2px solid #00FFFF;
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .restartButton:hover {
+            background: #00DD00;
+            box-shadow: 0 0 20px #00FFFF;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="welcomeScreen">
+            <div class="welcomeContent">
+                <div class="welcomeTitle">TILT FIRE</div>
+                <div class="welcomeSubtitle">← → Arrow Keys to Move</div>
+                <div class="welcomeSubtitle">SPACE to Fire</div>
+                <div class="welcomeSubtitle">Click to Fire</div>
+                <button class="startButton" onclick="startGame()">START GAME</button>
+            </div>
+        </div>
+
+        <div id="gameArea" class="hidden">
+            <div id="hud">
+                <div class="scoreContainer">
+                    <div class="scoreLabel">SCORE</div>
+                    <div class="scoreValue" id="score">0</div>
+                </div>
+                <div class="gameTitle">TILT FIRE</div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen">
+            <div class="gameOverCard">
+                <div class="gameOverText">GAME OVER</div>
+                <div class="scoreLabel">FINAL SCORE</div>
+                <div class="finalScore" id="finalScore">0</div>
+                <button class="restartButton" onclick="restartGame()">RESTART GAME</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCREEN_WIDTH = window.innerWidth;
+        const SCREEN_HEIGHT = window.innerHeight;
+        const PLAYER_WIDTH = 50;
+        const PLAYER_HEIGHT = 50;
+        const BULLET_WIDTH = 10;
+        const BULLET_HEIGHT = 20;
+        const BLOCK_WIDTH = 40;
+        const BLOCK_HEIGHT = 40;
+        const HUD_HEIGHT = 130;
+
+        let gameState = {
+            playerX: (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
+            bullets: [],
+            blocks: [],
+            gameOver: false,
+            gameStarted: false,
+            score: 0
+        };
+
+        const keysPressed = {};
+        let gameLoop;
+        let spawnLoop;
+        let shootLoop;
+        let moveLoop;
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                keysPressed.left = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                keysPressed.right = true;
+                e.preventDefault();
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                fireWeapon();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') {
+                keysPressed.left = false;
+            } else if (e.key === 'ArrowRight') {
+                keysPressed.right = false;
+            }
+        });
+
+        // Click to fire
+        document.getElementById('gameArea').addEventListener('click', fireWeapon);
+
+        function fireWeapon() {
+            if (!gameState.gameStarted || gameState.gameOver) return;
+            gameState.bullets.push({
+                id: Math.random(),
+                x: gameState.playerX + PLAYER_WIDTH / 2 - BULLET_WIDTH / 2,
+                y: SCREEN_HEIGHT - PLAYER_HEIGHT - 25
+            });
+        }
+
+        function startGame() {
+            gameState.gameStarted = true;
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            startGameLoops();
+        }
+
+        function restartGame() {
+            gameState = {
+                playerX: (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
+                bullets: [],
+                blocks: [],
+                gameOver: false,
+                gameStarted: false,
+                score: 0
+            };
+            document.getElementById('gameOverScreen').classList.remove('show');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            document.getElementById('gameArea').classList.add('hidden');
+            stopGameLoops();
+        }
+
+        function startGameLoops() {
+            // Smooth movement
+            moveLoop = setInterval(() => {
+                if (keysPressed.left) {
+                    gameState.playerX = Math.max(0, gameState.playerX - 15);
+                }
+                if (keysPressed.right) {
+                    gameState.playerX = Math.min(SCREEN_WIDTH - PLAYER_WIDTH, gameState.playerX + 15);
+                }
+                updatePlayerPosition();
+            }, 16);
+
+            // Main game loop
+            gameLoop = setInterval(() => {
+                if (gameState.gameOver) return;
+
+                // Update bullets
+                gameState.bullets = gameState.bullets
+                    .map(b => ({ ...b, y: b.y - 12 }))
+                    .filter(b => b.y > HUD_HEIGHT);
+
+                // Update blocks
+                gameState.blocks = gameState.blocks
+                    .map(b => ({ ...b, y: b.y + 6 }))
+                    .filter(b => b.y < SCREEN_HEIGHT);
+
+                // Check collision with player
+                for (let block of gameState.blocks) {
+                    if (
+                        block.y + BLOCK_HEIGHT > SCREEN_HEIGHT - PLAYER_HEIGHT - 20 &&
+                        block.x < gameState.playerX + PLAYER_WIDTH &&
+                        block.x + BLOCK_WIDTH > gameState.playerX
+                    ) {
+                        gameState.gameOver = true;
+                        showGameOver();
+                        return;
+                    }
+                }
+
+                // Collision detection
+                let hitBlocks = new Set();
+                let hitBullets = new Set();
+                let scoreIncrease = 0;
+
+                for (let bullet of gameState.bullets) {
+                    for (let block of gameState.blocks) {
+                        if (
+                            bullet.y < block.y + BLOCK_HEIGHT &&
+                            bullet.y + BULLET_HEIGHT > block.y &&
+                            bullet.x < block.x + BLOCK_WIDTH &&
+                            bullet.x + BULLET_WIDTH > block.x
+                        ) {
+                            hitBlocks.add(block.id);
+                            hitBullets.add(bullet.id);
+                            scoreIncrease += 10;
+                        }
+                    }
+                }
+
+                gameState.bullets = gameState.bullets.filter(b => !hitBullets.has(b.id));
+                gameState.blocks = gameState.blocks.filter(b => !hitBlocks.has(b.id));
+                gameState.score += scoreIncrease;
+
+                render();
+            }, 16);
+
+            // Spawn blocks
+            spawnLoop = setInterval(() => {
+                if (!gameState.gameOver) {
+                    gameState.blocks.push({
+                        id: Math.random(),
+                        x: Math.random() * (SCREEN_WIDTH - BLOCK_WIDTH),
+                        y: HUD_HEIGHT
+                    });
+                }
+            }, 700);
+
+            // Auto-shoot
+            shootLoop = setInterval(() => {
+                if (!gameState.gameOver) {
+                    gameState.bullets.push({
+                        id: Math.random(),
+                        x: gameState.playerX + PLAYER_WIDTH / 2 - BULLET_WIDTH / 2,
+                        y: SCREEN_HEIGHT - PLAYER_HEIGHT - 25
+                    });
+                }
+            }, 50);
+
+            render();
+        }
+
+        function stopGameLoops() {
+            clearInterval(gameLoop);
+            clearInterval(spawnLoop);
+            clearInterval(shootLoop);
+            clearInterval(moveLoop);
+        }
+
+        function updatePlayerPosition() {
+            const player = document.getElementById('player');
+            if (player) {
+                player.style.left = gameState.playerX + 'px';
+            }
+        }
+
+        function showGameOver() {
+            stopGameLoops();
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('gameOverScreen').classList.add('show');
+        }
+
+        function render() {
+            // Update score
+            document.getElementById('score').textContent = gameState.score;
+
+            // Clear and redraw
+            const gameArea = document.getElementById('gameArea');
+            
+            // Remove old elements
+            document.querySelectorAll('.bullet, .block, #player').forEach(el => el.remove());
+
+            // Draw bullets
+            gameState.bullets.forEach(bullet => {
+                const el = document.createElement('div');
+                el.className = 'bullet';
+                el.style.left = bullet.x + 'px';
+                el.style.top = bullet.y + 'px';
+                gameArea.appendChild(el);
+            });
+
+            // Draw blocks
+            gameState.blocks.forEach(block => {
+                const el = document.createElement('div');
+                el.className = 'block';
+                el.style.left = block.x + 'px';
+                el.style.top = block.y + 'px';
+                gameArea.appendChild(el);
+            });
+
+            // Draw player
+            const player = document.createElement('div');
+            player.id = 'player';
+            player.className = 'player';
+            player.style.left = gameState.playerX + 'px';
+            player.textContent = '▲';
+            gameArea.appendChild(player);
+        }
+    </script>
+</body>
+</html>
